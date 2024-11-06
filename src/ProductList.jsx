@@ -3,13 +3,16 @@ import { useDispatch } from 'react-redux';
 import './ProductList.css'
 import CartItem from './CartItem';
 import { addItem } from './CartSlice';
+import { useSelector } from 'react-redux';
+import { selectTotalQuantity } from './CartSlice';
 
 function ProductList() {
     const [showCart, setShowCart] = useState(false); 
     const [showPlants, setShowPlants] = useState(false); // State to control the visibility of the About Us page
     const [addedToCart, setAddedToCart] = useState({});
     const dispatch = useDispatch();
-    
+    const totalQuantity = useSelector(selectTotalQuantity);
+
     const plantsArray = [
         {
             category: "Air Purifying Plants",
@@ -217,49 +220,96 @@ function ProductList() {
             ]
         }
     ];
-   const styleObj={
+    const styleObj = {
     backgroundColor: '#4CAF50',
     color: '#fff!important',
     padding: '15px',
     display: 'flex',
     justifyContent: 'space-between',
-    alignIems: 'center',
+    alignItems: 'center', // Fixed typo 'alignIems' to 'alignItems'
     fontSize: '20px',
-   }
-   const styleObjUl={
+    };
+    
+    const styleObjUl = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     width: '1100px',
-   }
-   const styleA={
+    };
+    
+    const styleA = {
     color: 'white',
     fontSize: '30px',
     textDecoration: 'none',
-   }
-   const handleCartClick = (e) => {
+    position: 'relative',  // Added position relative to allow positioning the badge inside
+    };
+    
+    const styleCart = {
+    position: 'relative',  // Position relative to the container for absolute positioning of the badge
+    display: 'inline-block',
+    };
+    
+    const styleCartSvg = {
+    width: '68px',  // Size of the cart icon
+    height: '68px',
+    };
+    
+    const styleCartQuantityBadge = {
+    position: 'absolute',  // Position the badge inside the cart icon
+    top: '22px',  // Adjust vertical position inside the cart
+    right: '20px',  // Adjust horizontal position inside the cart
+    backgroundColor: '#ff6961',  // Badge background color
+    color: 'white',  // Badge text color
+    borderRadius: '50%',  // Circular shape for the badge
+    padding: '4px 8px',  // Padding inside the badge (adjustable size)
+    fontSize: '14px',  // Font size for the badge text
+    fontWeight: 'bold',  // Bold text for visibility
+    textAlign: 'center',  // Center-align the text
+    lineHeight: '1',  // Ensure the text is centered vertically
+    minWidth: '20px',  // Ensure the badge has a minimum size
+    height: '20px',  // Ensure the badge is circular
+    };
+
+    const buttonStyle = {
+    backgroundColor: '#4CAF50', // Green color by default
+    color: '#fff',
+    padding: '10px 20px',
+    border: 'none',
+    cursor: 'pointer',
+    fontSize: '16px',
+    };
+    
+    const disabledButtonStyle = {
+    backgroundColor: '#d3d3d3',  // Light gray background when disabled
+    padding: '10px 20px',
+    border: 'none',
+    cursor: 'not-allowed',       // Cursor changes to 'not-allowed'
+    fontSize: '16px',
+    };
+
+    const handleCartClick = (e) => {
     e.preventDefault();
     setShowCart(true); // Set showCart to true when cart icon is clicked
-};
-const handlePlantsClick = (e) => {
+    };
+    const handlePlantsClick = (e) => {
     e.preventDefault();
     setShowPlants(true); // Set showAboutUs to true when "About Us" link is clicked
     setShowCart(false); // Hide the cart when navigating to About Us
-};
+    };
 
-   const handleContinueShopping = (e) => {
+    const handleContinueShopping = (e) => {
     e.preventDefault();
     setShowCart(false);
-  };
+    };
 
-  const handleAddToCart = (product) => {
+    const handleAddToCart = (product) => {
     dispatch(addItem(product));
     setAddedToCart((prevState) => ({
        ...prevState,
        [product.name]: true, // Set the product name as key and value as true to indicate it's added to cart
      }));
-  };
-
+    };
+    
     return (
         <div>
              <div className="navbar" style={styleObj}>
@@ -276,9 +326,25 @@ const handlePlantsClick = (e) => {
               
             </div>
             <div style={styleObjUl}>
-                <div> <a href="#" onClick={(e)=>handlePlantsClick(e)} style={styleA}>Plants</a></div>
-                <div> <a href="#" onClick={(e) => handleCartClick(e)} style={styleA}><h1 className='cart'><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" id="IconChangeColor" height="68" width="68"><rect width="156" height="156" fill="none"></rect><circle cx="80" cy="216" r="12"></circle><circle cx="184" cy="216" r="12"></circle><path d="M42.3,72H221.7l-26.4,92.4A15.9,15.9,0,0,1,179.9,176H84.1a15.9,15.9,0,0,1-15.4-11.6L32.5,37.8A8,8,0,0,0,24.8,32H8" fill="none" stroke="#faf9f9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" id="mainIconPathAttribute"></path></svg></h1></a></div>
+            <div>
+            <a href="#" onClick={handlePlantsClick} style={styleA}>Plants</a>
             </div>
+            <div>
+            <a href="#" onClick={handleCartClick} style={styleA}>
+                <h1 className="cart" style={styleCart}>
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" style={styleCartSvg}>
+                    <rect width="156" height="156" fill="none"></rect>
+                    <circle cx="80" cy="216" r="12"></circle>
+                    <circle cx="184" cy="216" r="12"></circle>
+                    <path d="M42.3,72H221.7l-26.4,92.4A15.9,15.9,0,0,1,179.9,176H84.1a15.9,15.9,0,0,1-15.4-11.6L32.5,37.8A8,8,0,0,0,24.8,32H8" fill="none" stroke="#faf9f9" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2"></path>
+                </svg>
+                {totalQuantity > 0 && (
+                    <span style={styleCartQuantityBadge}>{totalQuantity}</span>
+                )}
+                </h1>
+            </a>
+            </div>
+        </div>
         </div>
         {!showCart? (
         <div className="product-grid">
@@ -290,7 +356,14 @@ const handlePlantsClick = (e) => {
                         <div className="product-card" key={plantIndex}>
                             <img className="product-image" src={plant.image} alt={plant.name} />
                             <div className="product-title">{plant.name}</div>
-                            <button  className="product-button" onClick={() => handleAddToCart(plant)}>Add to Cart</button>
+                            <button
+                                className="product-button"
+                                onClick={() => handleAddToCart(plant)}
+                                disabled={addedToCart[plant.name]}
+                                style={addedToCart[plant.name] ? disabledButtonStyle : buttonStyle}
+                            >
+                                {addedToCart[plant.name] ? 'Added to Cart' : 'Add to Cart'}
+                            </button>
                         </div>
                         ))}
                     </div>
